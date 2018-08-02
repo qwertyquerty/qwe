@@ -70,6 +70,10 @@ class Interpreter():
 
         return stack.pop()
 
+
+    def _op_less_than(self,op1,op2):
+        return OPERATORS.index(op1)<=OPERATORS.index(op2)
+
     def _tokens_to_rpn(self,items):
         stack = []
         rpn = []
@@ -86,7 +90,7 @@ class Interpreter():
                         rpn.append(op)
                         op = stack.pop()
                 else:
-                    while len(stack) > 0 and OPERATORS.index(c)<=OPERATORS.index(stack[-1]):
+                    while len(stack) > 0 and self._op_less_than(c,stack[-1]):
                         rpn.append(stack.pop())
                     stack.append(c)
 
