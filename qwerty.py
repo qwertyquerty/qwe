@@ -147,7 +147,7 @@ class Interpreter():
         var, val = line.split("=")
         var = var.replace(" ", "")
         val = self._eval(val)
-        if RE_VARNAME.match(var):
+        if RE_VARNAME.match(var) and len(var) > 0:
             self.vars[var] = val
         else:
             self._error(3,var)

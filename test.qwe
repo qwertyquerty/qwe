@@ -1,1 +1,5 @@
-let  = 5
+let a = 1
+let a = a * 2
+log a
+if a > 2^30 then exit
+goto 2
