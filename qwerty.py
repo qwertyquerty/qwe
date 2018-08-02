@@ -7,9 +7,12 @@ class Interpreter():
         self.vars = {}
         self.running = True
         self.lines = text.split("\n")
+        self.lines = list(filter(lambda a: a != "", self.lines))
+
         while self.line < len(self.lines) and self.running:
             self._interpret(self.lines[self.line])
             self.line = self.line + 1
+
 
     def _interpret(self,line):
         command = line.split(" ")[0]
@@ -26,6 +29,15 @@ class Interpreter():
                 self.c_exit(line)
             elif command == "if":
                 self.c_if(line)
+        else:
+            self._error(1,command)
+
+    def _error(self,id,info=None):
+        if info == None:
+            print("[ERROR] "+ERRORS[id]+" on line "+str(self.line+1))
+        else:
+            print("[ERROR] "+ERRORS[id]+" on line "+str(self.line+1)+": "+info)
+        exit()
 
     def _lex(self,line):
         lexed =  RE_LEX.split(line)
@@ -41,7 +53,10 @@ class Interpreter():
             try:
                 item = float(item)
             except:
-                item = self.vars[item]
+                try:
+                    item = self.vars[item]
+                except KeyError:
+                    self._error(2,item)
         return item
 
 
@@ -113,6 +128,8 @@ class Interpreter():
             return lt ** rt
         elif op == "==":
             return int(lt == rt)
+        elif op == "!=":
+            return int(lt != rt)
         elif op == ">=":
             return int(lt >= rt)
         elif op == "<=":
@@ -130,7 +147,10 @@ class Interpreter():
         var, val = line.split("=")
         var = var.replace(" ", "")
         val = self._eval(val)
-        self.vars[var] = val
+        if RE_VARNAME.match(var):
+            self.vars[var] = val
+        else:
+            self._error(3,var)
 
     def c_log(self,line):
         print(self._eval(line))
@@ -139,11 +159,12 @@ class Interpreter():
         self.line = self._eval(line)-2
 
     def c_exit(self,line):
-        self.running = False
+        exit()
 
     def c_if(self,line):
         condition, action = line.split(" then ")
         if self._eval(condition) != 0:
             self._interpret(action)
+
 
 i = Interpreter(open("test.qwe").read())
