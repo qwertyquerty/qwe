@@ -121,6 +121,10 @@ class Interpreter():
             return int(lt > rt)
         elif op == "<":
             return int(lt < rt)
+        elif op == "and":
+            return lt and rt
+        elif op == "or":
+            return lt or rt
 
     def c_let(self,line):
         var, val = line.split("=")
