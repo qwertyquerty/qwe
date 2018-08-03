@@ -5,5 +5,5 @@ if n % 3 == 0 then let s = s + "Fizz"
 if n % 5 == 0 then let s = s + "Buzz"
 if s == "" then log n
 else log s
-wait 300 # Wait for 300ms
+wait 200 # Wait for 200ms
 goto 2 # Loop back to line 2
