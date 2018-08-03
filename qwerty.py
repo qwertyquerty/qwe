@@ -4,6 +4,24 @@ import time
 from config import *
 
 
+class Operator():
+    def __init__(self,type):
+        self.type = type
+        self.value = OPERATORS[self.type][1]
+        self.operate = OPERATORS[self.type][0]
+    def __str__(self):
+        return self.type
+    def __repr__(self):
+        return self.type
+    def __gt__(self,other):
+        return self.value > other.value
+    def __lt__(self,other):
+        return self.value < other.value
+    def __le__(self,other):
+        return self.value <= other.value
+    def __ge__(self,other):
+        return self.value >= other.value
+
 
 
 class Interpreter():
@@ -103,7 +121,7 @@ class Interpreter():
                         if item != " ":
                             items.append(self._string_to_obj(item))
                     else:
-                        items.append(item)
+                        items.append(Operator(item))
                 else:
                     str_gen += str(item)
 
@@ -117,18 +135,15 @@ class Interpreter():
         stack = []
 
         for item in items:
-            if item in OPERATORS:
+            if type(item) == Operator:
                 rt = stack.pop()
                 lt = stack.pop()
-                stack.append(self._operate(lt,rt,item))
+                stack.append(item.operate(lt,rt))
             else:
                 stack.append(item)
 
         return stack.pop()
 
-
-    def _op_less_than(self,op1,op2):
-        return OPERATORS.index(op1)<=OPERATORS.index(op2)
 
     def _tokens_to_rpn(self,items):
         stack = []
@@ -136,22 +151,21 @@ class Interpreter():
         in_parentheses = False
 
         for c in items:
-            if type(c) == float or type(c) == int:
+            if type(c) == float or type(c) == int or type(c) == str:
                 rpn.append(c)
-            elif type(c) == str and c not in OPERATORS:
-                rpn.append(c)
-            elif c in OPERATORS:
-                if c == "(":
+
+            elif type(c) == Operator:
+                if c.type == "(":
                     stack.append(c)
                     in_parentheses = True
-                elif c == ")":
+                elif c.type == ")":
                     op = stack.pop()
                     in_parentheses = False
-                    while not op == "(":
+                    while not op.type == "(":
                         rpn.append(op)
                         op = stack.pop()
                 else:
-                    while len(stack) > 0 and self._op_less_than(c,stack[-1]):
+                    while len(stack) > 0 and c<=stack[-1]:
                         rpn.append(stack.pop())
                     stack.append(c)
 
@@ -162,35 +176,6 @@ class Interpreter():
             self._error(6)
         return rpn
 
-    def _operate(self,lt,rt,op):
-        if op == "+":
-            return lt + rt
-        elif op == "-":
-            return lt + rt
-        elif op == "/":
-            return lt / rt
-        elif op == "*":
-            return lt * rt
-        elif op == "%":
-            return lt % rt
-        elif op == "^":
-            return lt ** rt
-        elif op == "==":
-            return int(lt == rt)
-        elif op == "!=":
-            return int(lt != rt)
-        elif op == ">=":
-            return int(lt >= rt)
-        elif op == "<=":
-            return int(lt <= rt)
-        elif op == ">":
-            return int(lt > rt)
-        elif op == "<":
-            return int(lt < rt)
-        elif op == "and":
-            return lt and rt
-        elif op == "or":
-            return lt or rt
 
     def c_let(self,line):
         var, val = line.split("=")

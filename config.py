@@ -11,24 +11,24 @@ COMMANDS = [
     "wait"
 ]
 
-OPERATORS = [
- ")",
- "(",
- "and",
- "or",
- "==",
- "!=",
- ">=",
- "<=",
- ">",
- "<",
- "-",
- "+",
- "%",
- "/",
- "*",
- "^"
-]
+OPERATORS = {
+ ")": [lambda x, y: (x,y), 0],
+ "(": [lambda x, y: (x,y), 0],
+ "and": [lambda x, y: x and y, 1],
+ "or": [lambda x, y: x or y, 1],
+ "==": [lambda x, y: x == y, 2],
+ "!=": [lambda x, y: x != y, 2],
+ ">=": [lambda x, y: x >= y, 3],
+ "<=": [lambda x, y: x <= y, 3],
+ ">": [lambda x, y: x > y, 3],
+ "<": [lambda x, y: x < y, 3],
+ "-": [lambda x, y: x - y, 4],
+ "+": [lambda x, y: x + y, 4],
+ "%": [lambda x, y: x % y, 5],
+ "/": [lambda x, y: x / y, 5],
+ "*": [lambda x, y: x * y, 5],
+ "^": [lambda x, y: x ** y, 6]
+}
 
 ERRORS = {
     0: "invalid syntax",
