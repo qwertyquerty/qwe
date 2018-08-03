@@ -1,3 +1,4 @@
-log "DEHUMANIZE YOURSELF AND FACE BLOODSHED\n"*100
+let a = "What even is a \"wuzzle\""
+log a
 cls
 goto 1

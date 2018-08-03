@@ -113,6 +113,7 @@ class Interpreter():
                     str_gen = ""
                     in_str = True
                 else:
+                    str_gen = str_gen.replace('\\"',"\"")
                     items.append(str_gen)
                     in_str = False
             else:
@@ -219,4 +220,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("fizzbuzz.qwe").read())
+i = Interpreter(open("test.qwe").read())
