@@ -1,4 +1,6 @@
 import re
+import os
+import time
 from config import *
 
 class Interpreter():
@@ -29,8 +31,16 @@ class Interpreter():
                 self.c_log(line)
             elif command == "goto":
                 self.c_goto(line)
+
+
             elif command == "exit":
                 self.c_exit(line)
+
+            elif command == "cls":
+                self.c_cls(line)
+            elif command == "wait":
+                self.c_wait(line)
+
             elif command == "if":
                 self.c_if(line)
             elif command == "else":
@@ -183,5 +193,12 @@ class Interpreter():
         else:
             self._error(4)
         self.do_else = None
+
+    def c_cls(self,line):
+        os.system("cls")
+
+    def c_wait(self,line):
+        time.sleep(float(self._eval(line))/1000)
+
 
 i = Interpreter(open("test.qwe").read())

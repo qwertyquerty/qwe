@@ -1,8 +1,9 @@
 let a = 0
 let a = a + 1
 log a
-if a % 3 == 0 and a % 5 != 0 then log 10000000
-if a % 3 != 0 and a % 5 == 0 then log 20000000
-if a % 3 == 0 and a % 5 == 0 then log 30000000
-if a >= 100 then exit
+if a % 3 == 0 and a % 5 != 0 then log 1
+if a % 3 != 0 and a % 5 == 0 then log 2
+if a % 3 == 0 and a % 5 == 0 then log 3
+wait 500
+cls
 goto 2

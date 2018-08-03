@@ -6,7 +6,9 @@ COMMANDS = [
     "goto",
     "exit",
     "if",
-    "else"
+    "else",
+    "cls",
+    "wait"
 ]
 
 OPERATORS = [
