@@ -40,6 +40,7 @@ ERRORS = {
     6: "unclosed parentheses"
 }
 
+PARENTHESES = ["(", ")"]
 
 RE_LEX = re.compile(r'(\\"|"|\=\=|\-|\*|\\|\%|\+|\>\=|\<\=|\<|\>|\^|\)|\(|and|or| )')
 RE_COMMENT = re.compile(r"(#.*)")

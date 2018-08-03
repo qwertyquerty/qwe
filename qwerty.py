@@ -146,10 +146,19 @@ class Interpreter():
         return stack.pop()
 
 
-    def _tokens_to_rpn(self,items):
+    def _tokens_to_rpn(self,tokens):
         stack = []
         rpn = []
+        items = []
         in_parentheses = False
+
+        for i in range(len(tokens)):
+            item = tokens[i]
+            if (type(item) == Operator and item.type == "-") and (i == 0 or (type(tokens[i-1]) == Operator and not tokens[i-1].type in PARENTHESES)) and (type(tokens[i+1]) == float or type(tokens[i+1]) == int):
+                tokens[i+1] = tokens[i+1] * -1
+
+            else:
+                items.append(item)
 
         for c in items:
             if type(c) == float or type(c) == int or type(c) == str:

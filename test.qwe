@@ -1,4 +1,2 @@
-let a = "What even is a \"wuzzle\""
+let a = -1 + 1
 log a
-cls
-goto 1
