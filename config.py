@@ -40,4 +40,5 @@ ERRORS = {
 
 
 RE_LEX = re.compile(r"(\=\=|\-|\*|\\|\%|\+|\>\=|\<\=|\<|\>|\^|\)|\(|and|or| )")
+RE_COMMENT = re.compile(r"(#.*)")
 RE_VARNAME = re.compile(r"^[A-Za-z0-9_]*$")

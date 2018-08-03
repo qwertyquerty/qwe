@@ -9,7 +9,6 @@ class Interpreter():
         self.vars = {}
         self.running = True
         self.lines = text.split("\n")
-        self.lines = list(filter(lambda a: a != "", self.lines))
         self.do_else = None
         while self.line < len(self.lines) and self.running:
             self._interpret(self.lines[self.line])
@@ -18,6 +17,13 @@ class Interpreter():
 
     def _interpret(self,line):
         line = line.strip(" ")
+        comments = RE_COMMENT.search(line)
+
+        if comments:
+            line = line.replace(comments.group(1), "")
+        if line == "":
+            return
+
         command = line.split(" ")[0]
         if command in COMMANDS:
             line = line.lstrip(command)

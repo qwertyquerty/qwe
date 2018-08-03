@@ -1,9 +1,4 @@
-let a = 0
-let a = a + 1
-log a
-if a % 3 == 0 and a % 5 != 0 then log 1
-if a % 3 != 0 and a % 5 == 0 then log 2
-if a % 3 == 0 and a % 5 == 0 then log 3
-wait 500
-cls
-goto 2
+log 1 #This here prints the number 1
+# this should do nothing at all
+
+goto 1 #This here goes back to line 1, making this an infinite loop.
