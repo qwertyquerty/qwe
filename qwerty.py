@@ -20,6 +20,7 @@ class Interpreter():
 
     def _interpret(self,line):
         line = line.strip(" ")
+        line = line.replace("\\n", "\n")
         comments = RE_COMMENT.search(line)
 
         if comments:
@@ -233,4 +234,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("fizzbuzz.qwe").read())
+i = Interpreter(open("test.qwe").read())
