@@ -8,17 +8,21 @@ class Interpreter():
         self.running = True
         self.lines = text.split("\n")
         self.lines = list(filter(lambda a: a != "", self.lines))
-
+        self.do_else = None
         while self.line < len(self.lines) and self.running:
             self._interpret(self.lines[self.line])
             self.line = self.line + 1
 
 
     def _interpret(self,line):
+        line = line.strip(" ")
         command = line.split(" ")[0]
         if command in COMMANDS:
-
             line = line.lstrip(command)
+
+            if command != "else":
+                self.do_else = None
+
             if command == "let":
                 self.c_let(line)
             elif command == "log":
@@ -29,6 +33,8 @@ class Interpreter():
                 self.c_exit(line)
             elif command == "if":
                 self.c_if(line)
+            elif command == "else":
+                self.c_else(line)
         else:
             self._error(1,command)
 
@@ -162,9 +168,20 @@ class Interpreter():
         exit()
 
     def c_if(self,line):
-        condition, action = line.split(" then ")
+        condition, action = line.split("then")
         if self._eval(condition) != 0:
             self._interpret(action)
+            self.do_else = False
+        else:
+            self.do_else = True
 
+    def c_else(self,line):
+        action = line
+        if self.do_else != None:
+            if self.do_else:
+                self._interpret(action)
+        else:
+            self._error(4)
+        self.do_else = None
 
 i = Interpreter(open("test.qwe").read())

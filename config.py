@@ -5,7 +5,8 @@ COMMANDS = [
     "log",
     "goto",
     "exit",
-    "if"
+    "if",
+    "else"
 ]
 
 OPERATORS = [
@@ -31,7 +32,8 @@ ERRORS = {
     0: "invalid syntax",
     1: "invalid command",
     2: "undefined variable",
-    3: "invalid variable name"
+    3: "invalid variable name",
+    4: "else without if"
 }
 
 
