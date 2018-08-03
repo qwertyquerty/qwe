@@ -3,6 +3,9 @@ import os
 import time
 from config import *
 
+
+
+
 class Interpreter():
     def __init__(self,text):
         self.line = 0
@@ -64,7 +67,6 @@ class Interpreter():
     def _lex(self,line):
         lexed =  RE_LEX.split(line)
         lexed = list(filter(("").__ne__, lexed))
-        lexed = list(filter((" ").__ne__, lexed))
         return lexed
 
 
@@ -83,13 +85,29 @@ class Interpreter():
 
 
     def _eval(self,line):
+        in_str = False
         str_items = self._lex(line)
         items = []
         for item in str_items:
-            if item not in OPERATORS:
-                items.append(self._string_to_obj(item))
+            if item == "\"":
+                if not in_str:
+                    str_gen = ""
+                    in_str = True
+                else:
+                    items.append(str_gen)
+                    in_str = False
             else:
-                items.append(item)
+                if not in_str:
+                    if item not in OPERATORS:
+                        if item != " ":
+                            items.append(self._string_to_obj(item))
+                    else:
+                        items.append(item)
+                else:
+                    str_gen += str(item)
+
+        if in_str:
+            self._error(5)
 
         return self._eval_rpn(self._tokens_to_rpn(items))
 
@@ -114,15 +132,20 @@ class Interpreter():
     def _tokens_to_rpn(self,items):
         stack = []
         rpn = []
+        in_parentheses = False
 
         for c in items:
             if type(c) == float or type(c) == int:
                 rpn.append(c)
+            elif type(c) == str and c not in OPERATORS:
+                rpn.append(c)
             elif c in OPERATORS:
                 if c == "(":
                     stack.append(c)
+                    in_parentheses = True
                 elif c == ")":
                     op = stack.pop()
+                    in_parentheses = False
                     while not op == "(":
                         rpn.append(op)
                         op = stack.pop()
@@ -133,6 +156,9 @@ class Interpreter():
 
         while len(stack) > 0:
             rpn.append(stack.pop())
+
+        if in_parentheses:
+            self._error(6)
         return rpn
 
     def _operate(self,lt,rt,op):

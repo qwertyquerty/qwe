@@ -1,9 +1,9 @@
 let a = 0
 let a = a + 1
 log a
-if a % 3 == 0 and a % 5 != 0 then log 1
-if a % 3 != 0 and a % 5 == 0 then log 2
-if a % 3 == 0 and a % 5 == 0 then log 3
-wait 500
-cls
-goto 2
+if a % 3 == 0 and a % 5 != 0 then log "Fizz" #1 = Fizz
+if a % 3 != 0 and a % 5 == 0 then log "Buzz" #2 = Buzz
+if a % 3 == 0 and a % 5 == 0 then log "FizzBuzz" #3 = FizzBuzz
+wait 500 # Wait for half a second
+cls # Clear the console
+goto 2 # Loop back to line 2

@@ -1,4 +1,0 @@
-log 1 #This here prints the number 1
-# this should do nothing at all
-
-goto 1 #This here goes back to line 1, making this an infinite loop.
