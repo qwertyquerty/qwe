@@ -234,4 +234,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("test.qwe").read())
+i = Interpreter(open("fizzbuzz.qwe").read())
