@@ -139,7 +139,10 @@ class Interpreter():
             if type(item) == Operator:
                 rt = stack.pop()
                 lt = stack.pop()
-                stack.append(item.operate(lt,rt))
+                try:
+                    stack.append(item.operate(lt,rt))
+                except:
+                    self._error(7,type(lt).__name__+" "+str(item)+" "+type(rt).__name__)
             else:
                 stack.append(item)
 

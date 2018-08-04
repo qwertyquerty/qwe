@@ -37,7 +37,8 @@ ERRORS = {
     3: "invalid variable name",
     4: "else without if",
     5: "unclosed string",
-    6: "unclosed parentheses"
+    6: "unclosed parentheses",
+    7: "invalid operand"
 }
 
 PARENTHESES = ["(", ")"]
