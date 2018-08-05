@@ -13,14 +13,14 @@ if a == 1
             log a
         end
         else
-            log "naw naw naw"
+            log "no no no"
         end
     end
     else
-        log "naw naw"
+        log "no no"
     end
 end
 
 else
-    log "naw"
+    log "no"
 end

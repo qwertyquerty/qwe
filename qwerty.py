@@ -57,9 +57,9 @@ class Interpreter():
                     if command == "if":
                         self.nest_stack.append(["if", False])
                         self.do_else_stack.append(False)
-                    if command == "else":
+                    elif command == "else":
                         self.do_else_stack.pop(len(self.do_else_stack)-1)
-                    if command == "end":
+                    elif command == "end":
                         last = self.nest_stack.pop(len(self.nest_stack)-1)
                     return
 
@@ -206,7 +206,7 @@ class Interpreter():
         var, val = line.split("=")
         var = var.replace(" ", "")
         val = self._eval(val)
-        if RE_VARNAME.match(var) and len(var) > 0:
+        if RE_VARNAME.match(var) and len(var) > 0 and var not in COMMANDS:
             self.vars[var] = val
         else:
             self._error(3,var)
@@ -245,4 +245,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("test.qwe").read())
+i = Interpreter(open("fizzbuzz.qwe").read())
