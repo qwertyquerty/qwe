@@ -2,12 +2,12 @@ let wait_time = 1700
 let bottles_of_beer = 99
 if bottles_of_beer != 1
     log bottles_of_beer+" bottles of beer on the wall,"
-    wait wait_time*1.1
+    wait wait_time*1.2
     log bottles_of_beer+" bottles of beer,"
 end
 else
     log bottles_of_beer+" bottle of beer on the wall,"
-    wait wait_time*1.1
+    wait wait_time*1.2
     log bottles_of_beer+" bottle of beer,"
 end
 wait wait_time
@@ -19,10 +19,11 @@ let bottles_of_beer = bottles_of_beer - 1
 let wait_time = wait_time - 15
 if bottles_of_beer > 0
     log bottles_of_beer+" bottles of beer on the wall!"
-    wait wait_time
+    wait wait_time*1.2
     goto 3
 end
 else
     log "No more bottles of beer on the wall!"
+    wait wait_time*0.6
     log "Yaaaaaaay!"
 end
