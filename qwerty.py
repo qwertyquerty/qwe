@@ -31,6 +31,7 @@ class Interpreter():
         self.running = True
         self.lines = text.split("\n")
         self.do_else = None
+        self.nest_stack = []
         while self.line < len(self.lines) and self.running:
             self._interpret(self.lines[self.line])
             self.line = self.line + 1
@@ -48,9 +49,29 @@ class Interpreter():
 
         command = line.split(" ")[0]
         if command in COMMANDS:
+
             line = line.lstrip(command)
 
-            if command != "else":
+            if len(self.nest_stack) > 0:
+                if self.nest_stack[-1][1] == False:
+                    if command == "end":
+                        last = self.nest_stack.pop(len(self.nest_stack)-1)
+                        if last[0] == "if":
+                            self.do_else = not last[1]
+                        elif last[0] == "else":
+                            self.do_else = None
+                    return
+
+                elif self.nest_stack[-1][1] == True:
+                    if command == "end":
+                        last = self.nest_stack.pop(len(self.nest_stack)-1)
+                        if last[0] == "if":
+                            self.do_else = not last[1]
+                        elif last[0] == "else":
+                            self.do_else = None
+                        return
+
+            if command not in ["else", "end"]:
                 self.do_else = None
 
             if command == "let":
@@ -59,16 +80,12 @@ class Interpreter():
                 self.c_log(line)
             elif command == "goto":
                 self.c_goto(line)
-
-
             elif command == "exit":
                 self.c_exit(line)
-
             elif command == "cls":
                 self.c_cls(line)
             elif command == "wait":
                 self.c_wait(line)
-
             elif command == "if":
                 self.c_if(line)
             elif command == "else":
@@ -141,7 +158,7 @@ class Interpreter():
                 lt = stack.pop()
                 try:
                     stack.append(item.operate(lt,rt))
-                except:
+                except TypeError:
                     self._error(7,type(lt).__name__+" "+str(item)+" "+type(rt).__name__)
             else:
                 stack.append(item)
@@ -209,21 +226,20 @@ class Interpreter():
         exit()
 
     def c_if(self,line):
-        condition, action = line.split("then")
+        condition = line
         if self._eval(condition) != 0:
-            self._interpret(action)
-            self.do_else = False
+            self.nest_stack.append(["if",True])
         else:
-            self.do_else = True
+            self.nest_stack.append(["if",False])
 
     def c_else(self,line):
-        action = line
         if self.do_else != None:
             if self.do_else:
-                self._interpret(action)
+                self.nest_stack.append(["else", True])
+            else:
+                self.nest_stack.append(["else", False])
         else:
             self._error(4)
-        self.do_else = None
 
     def c_cls(self,line):
         os.system("cls")
@@ -232,4 +248,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("test.qwe").read())
+i = Interpreter(open("fizzbuzz.qwe").read())

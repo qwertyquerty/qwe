@@ -8,7 +8,8 @@ COMMANDS = [
     "if",
     "else",
     "cls",
-    "wait"
+    "wait",
+    "end"
 ]
 
 OPERATORS = {

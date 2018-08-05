@@ -1,2 +1,2 @@
-let a = -1 + "gsdgsdg"
+let a = -1 + 1
 log a

@@ -1,9 +1,21 @@
 let n = 0
 let n = n + 1
 let s = ""
-if n % 3 == 0 then let s = s + "Fizz"
-if n % 5 == 0 then let s = s + "Buzz"
-if s == "" then log n
-else log s
+if n % 3 == 0
+  let s = s + "Fizz"
+end
+
+if n % 5 == 0
+  let s = s + "Buzz"
+end
+
+if s == ""
+  log n
+end
+
+else
+  log s
+end
+
 wait 200 # Wait for 200ms
 goto 2 # Loop back to line 2
