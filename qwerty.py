@@ -152,6 +152,13 @@ class Interpreter():
                 rt = stack.pop()
                 lt = stack.pop()
                 try:
+
+                    if (type(rt) == str and type(lt)) == int or (type(lt) == str and type(rt) == int) and item.type == "+":
+                        if type(rt) == int:
+                            rt = str(rt)
+                        elif type(lt) == int:
+                            lt = str(lt)
+
                     stack.append(item.operate(lt,rt))
                 except TypeError:
                     self._error(7,type(lt).__name__+" "+str(item)+" "+type(rt).__name__)
@@ -245,4 +252,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("fizzbuzz.qwe").read())
+i = Interpreter(open("test.qwe").read())
