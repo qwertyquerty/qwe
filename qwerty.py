@@ -30,7 +30,7 @@ class Interpreter():
         self.vars = {}
         self.running = True
         self.lines = text.split("\n")
-        self.do_else = None
+        self.do_else_stack = []
         self.nest_stack = []
         while self.line < len(self.lines) and self.running:
             self._interpret(self.lines[self.line])
@@ -54,25 +54,20 @@ class Interpreter():
 
             if len(self.nest_stack) > 0:
                 if self.nest_stack[-1][1] == False:
+                    if command == "if":
+                        self.nest_stack.append(["if", False])
+                        self.do_else_stack.append(False)
+                    if command == "else":
+                        self.do_else_stack.pop(len(self.do_else_stack)-1)
                     if command == "end":
                         last = self.nest_stack.pop(len(self.nest_stack)-1)
-                        if last[0] == "if":
-                            self.do_else = not last[1]
-                        elif last[0] == "else":
-                            self.do_else = None
                     return
 
                 elif self.nest_stack[-1][1] == True:
                     if command == "end":
                         last = self.nest_stack.pop(len(self.nest_stack)-1)
-                        if last[0] == "if":
-                            self.do_else = not last[1]
-                        elif last[0] == "else":
-                            self.do_else = None
                         return
 
-            if command not in ["else", "end"]:
-                self.do_else = None
 
             if command == "let":
                 self.c_let(line)
@@ -229,12 +224,14 @@ class Interpreter():
         condition = line
         if self._eval(condition) != 0:
             self.nest_stack.append(["if",True])
+            self.do_else_stack.append(False)
         else:
             self.nest_stack.append(["if",False])
+            self.do_else_stack.append(True)
 
     def c_else(self,line):
-        if self.do_else != None:
-            if self.do_else:
+        if len(self.do_else_stack) > 0:
+            if self.do_else_stack.pop(len(self.do_else_stack)-1):
                 self.nest_stack.append(["else", True])
             else:
                 self.nest_stack.append(["else", False])
@@ -248,4 +245,4 @@ class Interpreter():
         time.sleep(float(self._eval(line))/1000)
 
 
-i = Interpreter(open("fizzbuzz.qwe").read())
+i = Interpreter(open("test.qwe").read())
