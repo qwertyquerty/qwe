@@ -1,7 +1,27 @@
-import re
-import os
-import time
-from config import *
+
+
+class Function():
+    def __init__(self,name=None,args=None,lines=None):
+        if lines == None:
+            self.lines = []
+        else:
+            self.lines = lines
+
+        self.args = args
+        self.name = name
+
+    def call(self, args, vars):
+        self.i = Interpreter(self.lines,self.name)
+        #print(self.lines)
+        for key,val in vars.items():
+            self.i.vars[key]=val
+
+        for key,val in zip(self.args, args):
+            self.i.vars[key]=val
+
+        o = self.i._run()
+        return o
+
 
 
 class Operator():
@@ -23,18 +43,27 @@ class Operator():
         return self.value >= other.value
 
 
-
 class Interpreter():
-    def __init__(self,text):
+    def __init__(self,lines=None, name=None):
         self.line = 0
-        self.vars = {}
+        self.name = name
+        self.vars = BUILTINS
         self.running = True
-        self.lines = text.split("\n")
         self.do_else_stack = []
         self.nest_stack = []
+        self.fn_line_stack = []
+        self.lines = lines
+
+    def _run(self):
         while self.line < len(self.lines) and self.running:
-            self._interpret(self.lines[self.line])
+            #print(self.lines[self.line])
+            out = self._interpret(self.lines[self.line])
             self.line = self.line + 1
+            if out != None:
+                return out
+        return 0
+
+
 
 
     def _interpret(self,line):
@@ -55,17 +84,36 @@ class Interpreter():
             if len(self.nest_stack) > 0:
                 if self.nest_stack[-1][1] == False:
                     if command == "if":
-                        self.nest_stack.append(["if", False])
+                        self.nest_stack.append(["", False])
                         self.do_else_stack.append(False)
                     elif command == "else":
                         self.do_else_stack.pop(len(self.do_else_stack)-1)
-                    elif command == "end":
+                    elif command == "while":
+                        self.nest_stack.append(["", False])
+                    elif command == "fn":
+                        self.nest_stack.append(["", False])
+
+                    if command == "]":
                         last = self.nest_stack.pop(len(self.nest_stack)-1)
+                        if last[0] == "fn":
+                            last[2].lines = self.fn_line_stack.pop(len(self.fn_line_stack)-1)
+                            self.vars[last[2].name] = last[2]
+
+                    if len(self.fn_line_stack) > 0:
+                        self.fn_line_stack[-1].append(self.lines[self.line])
+
+
+
                     return
 
                 elif self.nest_stack[-1][1] == True:
-                    if command == "end":
+                    if command == "]":
                         last = self.nest_stack.pop(len(self.nest_stack)-1)
+                        if last[0] == "while":
+                            self.line = last[2]-1
+
+
+
                         return
 
 
@@ -85,14 +133,27 @@ class Interpreter():
                 self.c_if(line)
             elif command == "else":
                 self.c_else(line)
+            elif command == "while":
+                self.c_while(line)
+            elif command == "return":
+                return self.c_return(line)
+            elif command == "fn":
+                self.c_fn(line)
         else:
-            self._error(1,command)
+            if len(self.fn_line_stack) > 0:
+                self.fn_line_stack[-1].append(line)
+                return
+
+            self._eval(line)
+
+
 
     def _error(self,id,info=None):
         if info == None:
-            print("[ERROR] "+ERRORS[id]+" on line "+str(self.line+1))
+            print("[ERROR] "+ERRORS[id]+" in "+self.name+" on line "+str(self.line+1))
         else:
-            print("[ERROR] "+ERRORS[id]+" on line "+str(self.line+1)+": "+info)
+            print("[ERROR] "+ERRORS[id]+" in "+self.name+" on line "+str(self.line+1)+": "+info)
+
         exit()
 
     def _lex(self,line):
@@ -110,41 +171,96 @@ class Interpreter():
             except:
                 try:
                     item = self.vars[item]
+
                 except KeyError:
                     self._error(2,item)
+
         return item
 
 
     def _eval(self,line):
+        if line == "":
+            return
         in_str = False
+        in_args = False
+        args_gen = []
+        arg_name = ""
         str_items = self._lex(line)
         items = []
+        i = 0
+        pars = 0
+        #print("STRS "+str(str_items))
         for item in str_items:
-            if item == "\"":
-                if not in_str:
-                    str_gen = ""
-                    in_str = True
-                else:
-                    str_gen = str_gen.replace('\\"',"\"")
-                    items.append(str_gen)
-                    in_str = False
-            else:
-                if not in_str:
-                    if item not in OPERATORS:
-                        if item != " ":
-                            items.append(self._string_to_obj(item))
+
+            if in_args:
+
+                #print("PARS "+str(pars), item)
+                if item == "(":
+                    if pars > -1:
+                        args_gen[-1] += ("(")
+                    pars = pars + 1
+
+
+                elif item == ")":
+                    if pars == 0:
+                        args_gen[-1] = self._eval(args_gen[-1])
+                        in_args = False
+                        items.append(self.vars[fn_name].call(args_gen,self.vars))
+
                     else:
-                        items.append(Operator(item))
+                        pars = pars - 1
+                        args_gen[-1] += (")")
+
+                elif item == "," and pars == 0:
+                    args_gen[-1] = self._eval(args_gen[-1])
+                    args_gen.append("")
+
                 else:
-                    str_gen += str(item)
+                    args_gen[-1] += (item)
+
+            else:
+                if item == "\"":
+                    if not in_str:
+                        str_gen = ""
+                        in_str = True
+                    else:
+                        str_gen = str_gen.replace('\\"',"\"")
+                        items.append(str_gen)
+                        in_str = False
+
+                else:
+                    if not in_str:
+                        if item not in OPERATORS:
+
+                            if i < len(str_items)-1  and str_items[i+1] == "(" and item != " ":
+                                in_args = True
+                                args_gen = [""]
+                                fn_name = item
+                                pars = -1
+
+                            elif item != " ":
+                                items.append(self._string_to_obj(item))
+                        else:
+
+                            items.append(Operator(item))
+                    else:
+                        str_gen += str(item)
+
+            i += 1
 
         if in_str:
             self._error(5)
 
-        return self._eval_rpn(self._tokens_to_rpn(items))
+        out = self._eval_rpn(self._tokens_to_rpn(items))
+
+        return out
+
+
+
+
 
     def _eval_rpn(self,items):
-
+        #print("ITEMS "+str(items))
         stack = []
 
         for item in items:
@@ -165,20 +281,26 @@ class Interpreter():
             else:
                 stack.append(item)
 
-        return stack.pop()
+        out =  stack.pop()
 
+        if type(out) == bool:
+            out = int(out)
+
+        return out
 
     def _tokens_to_rpn(self,tokens):
+        #print(tokens)
         stack = []
         rpn = []
         items = []
         in_parentheses = False
-
         for i in range(len(tokens)):
+
             item = tokens[i]
             if (type(item) == Operator and item.type == "-") and (i == 0 or (type(tokens[i-1]) == Operator and not tokens[i-1].type in PARENTHESES)) and (type(tokens[i+1]) == float or type(tokens[i+1]) == int):
                 tokens[i+1] = tokens[i+1] * -1
-
+            elif (type(item) == Operator and item.type == "not") and (i == 0 or (type(tokens[i-1]) == Operator and not tokens[i-1].type in PARENTHESES)) and (type(tokens[i+1]) == float or type(tokens[i+1]) == int):
+                tokens[i+1] = int(not tokens[i+1])
             else:
                 items.append(item)
 
@@ -210,11 +332,27 @@ class Interpreter():
 
 
     def c_let(self,line):
-        var, val = line.split("=")
+        if len(line.split("+=", 1)) == 2:
+            var,val=line.split("+=",1)
+            op = "+="
+        elif len(line.split("-=", 1)) == 2:
+            var,val=line.split("-=",1)
+            op = "-="
+        elif len(line.split("=", 1)) == 2:
+            var,val=line.split("=",1)
+            op = "="
+
+
         var = var.replace(" ", "")
-        val = self._eval(val)
-        if RE_VARNAME.match(var) and len(var) > 0 and var not in COMMANDS:
-            self.vars[var] = val
+        #val = self._eval(val)
+        if RE_VARNAME.match(var) and len(var) > 0 and var not in COMMANDS and var not in OPERATORS.keys():
+            if op == "=":
+                self.vars[var] = self._eval(val)
+            elif op == "+=":
+                self.vars[var] = self._eval(var+" + ("+val+")")
+            elif op == "-=":
+                self.vars[var] = self._eval(var+" - ("+val+")")
+
         else:
             self._error(3,var)
 
@@ -228,7 +366,11 @@ class Interpreter():
         exit()
 
     def c_if(self,line):
-        condition = line
+        if line[-1] == "[":
+            condition = line.split("[")[0]
+        else:
+            self._error(0)
+
         if self._eval(condition) != 0:
             self.nest_stack.append(["if",True])
             self.do_else_stack.append(False)
@@ -237,13 +379,32 @@ class Interpreter():
             self.do_else_stack.append(True)
 
     def c_else(self,line):
+        if len(line) == 0 or line[-1] != "[":
+            self._error(0)
+
         if len(self.do_else_stack) > 0:
-            if self.do_else_stack.pop(len(self.do_else_stack)-1):
-                self.nest_stack.append(["else", True])
-            else:
-                self.nest_stack.append(["else", False])
+            self.nest_stack.append(["else", bool(self.do_else_stack.pop(len(self.do_else_stack)-1))])
+
         else:
             self._error(4)
+
+    def c_while(self,line):
+        if line[-1] == "[":
+            condition = line.split("[")[0]
+        else:
+            self._error(0)
+
+        self.nest_stack.append(["while",bool(self._eval(condition)), self.line, condition])
+
+    def c_fn(self,line):
+        name,args = line.split("(")
+        args = args.strip(" ").strip("[").strip(" ").strip(")").replace(" ", "").split(",")
+        args = [arg for arg in args if arg != ""]
+        name=name.strip(" ")
+        fn = Function(name,args)
+        self.nest_stack.append(["fn", False, fn])
+        self.fn_line_stack.append([])
+
 
     def c_cls(self,line):
         os.system("cls")
@@ -251,5 +412,11 @@ class Interpreter():
     def c_wait(self,line):
         time.sleep(float(self._eval(line))/1000)
 
+    def c_return(self,line):
+        return self._eval(line)
 
-i = Interpreter(open("bottlesofbeer.qwe").read())
+
+from config import *
+import re
+import os
+import time

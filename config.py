@@ -1,4 +1,9 @@
 import re
+import qwerty
+
+BUILTINS = {
+    "log": qwerty.Function(name="log", args=["text"], lines=["log text"])
+}
 
 COMMANDS = [
     "let",
@@ -9,15 +14,24 @@ COMMANDS = [
     "else",
     "cls",
     "wait",
-    "end"
+    "end",
+    "while",
+    "return",
+    "fn",
+    "]"
 ]
+
 
 OPERATORS = {
  ")": [lambda x, y: (x,y), 0],
  "(": [lambda x, y: (x,y), 0],
  "and": [lambda x, y: x and y, 1],
+ "not": [lambda x: not x, 1],
  "or": [lambda x, y: x or y, 1],
+ "&&": [lambda x, y: x and y, 1],
+ "||": [lambda x, y: x or y, 1],
  "==": [lambda x, y: x == y, 2],
+ "is": [lambda x, y: x == y, 2],
  "!=": [lambda x, y: x != y, 2],
  ">=": [lambda x, y: x >= y, 3],
  "<=": [lambda x, y: x <= y, 3],
@@ -44,6 +58,6 @@ ERRORS = {
 
 PARENTHESES = ["(", ")"]
 
-RE_LEX = re.compile(r'(\\"|"|\=\=|\-|\*|\\|\%|\+|\>\=|\<\=|\<|\>|\^|\)|\(|and|or| )')
+RE_LEX = re.compile(r'(\\"|"|\=\=|is|\-|\*|\\|\%|\+|\>\=|\<\=|\<|\>|\^|\)|\(|and|not|or|\|\||\&\&|\[|\]|\,| )')
 RE_COMMENT = re.compile(r"(#.*)")
 RE_VARNAME = re.compile(r"^[A-Za-z0-9_]*$")

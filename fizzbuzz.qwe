@@ -1,21 +1,34 @@
+fn fizzbuzz(n) [
+
+  let s = ""
+  log(x)
+
+  if n % 3 == 0 [
+    let s = s + "Fizz"
+  ]
+
+  if n % 5 == 0 [
+    let s = s + "Buzz"
+  ]
+
+  if s == "" [
+    return n
+  ]
+
+  else [
+    return s
+  ]
+
+]
+
 let n = 0
-let n = n + 1
-let s = ""
-if n % 3 == 0
-  let s = s + "Fizz"
-end
 
-if n % 5 == 0
-  let s = s + "Buzz"
-end
+while 1 [
 
-if s == ""
-  log n
-end
+  let n = n + 1
 
-else
-  log s
-end
+  log(fizzbuzz(n))
 
-wait 200 # Wait for 200ms
-goto 2 # Loop back to line 2
+  wait 100 # Wait for 200ms
+
+]

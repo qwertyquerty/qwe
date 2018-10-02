@@ -1,0 +1,18 @@
+let x = 7
+
+
+log("test")
+
+
+fn add(a,b) [
+  return a+b
+]
+
+log(add(1,2))
+
+fn logx() [
+  log(x)
+]
+
+logx()
+logx()
