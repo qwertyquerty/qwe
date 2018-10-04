@@ -1,18 +1,24 @@
-let x = 7
+x = 7
+
+log(x)
+
+y = 4
 
 
-log("test")
+x = 7
 
+log(x == "78")
 
-fn add(a,b) [
-  return a+b
+if x == "78" [
+  t = 4
+  log("x is 7")
+  log(t)
 ]
 
-log(add(1,2))
+log(1)
 
-fn logx() [
-  log(x)
-]
+#log(t)
 
-logx()
-logx()
+x = x ^ y
+
+log(x)

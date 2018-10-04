@@ -1,8 +1,12 @@
 import re
 import qwerty
 
+def builtin_log(args,vars):
+    print(args[0])
+    return args[0]
+
 BUILTINS = {
-    "log": qwerty.Function(name="log", args=["text"], lines=["log text"])
+    "log": qwerty.Function(name="log", args=["text"], builtin=builtin_log)
 }
 
 COMMANDS = [
@@ -21,10 +25,10 @@ COMMANDS = [
     "]"
 ]
 
-
 OPERATORS = {
- ")": [lambda x, y: (x,y), 0],
- "(": [lambda x, y: (x,y), 0],
+ ")": [lambda x, y: (x,y), -1],
+ "(": [lambda x, y: (x,y), -1],
+ "=": [None, 0],
  "and": [lambda x, y: x and y, 1],
  "not": [lambda x: not x, 1],
  "or": [lambda x, y: x or y, 1],
@@ -58,6 +62,6 @@ ERRORS = {
 
 PARENTHESES = ["(", ")"]
 
-RE_LEX = re.compile(r'(\\"|"|\=\=|is|\-|\*|\\|\%|\+|\>\=|\<\=|\<|\>|\^|\)|\(|and|not|or|\|\||\&\&|\[|\]|\,| )')
+RE_LEX = re.compile(r'(\\"|"|\=\=|is|\-|\*|\\|\%|\+|\>\=|\<\=|\<|\>|\^|\)|\(|and|not|or|\|\||\&\&|\[|\]|\,| |=)')
 RE_COMMENT = re.compile(r"(#.*)")
 RE_VARNAME = re.compile(r"^[A-Za-z0-9_]*$")

@@ -1,7 +1,7 @@
-
+import traceback
 
 class Function():
-    def __init__(self,name=None,args=None,lines=None):
+    def __init__(self,name=None,args=None,lines=None,builtin=None):
         if lines == None:
             self.lines = []
         else:
@@ -9,6 +9,9 @@ class Function():
 
         self.args = args
         self.name = name
+
+        if builtin:
+            self.call = builtin
 
     def call(self, args, vars):
         self.i = Interpreter(self.lines,self.name)
@@ -28,7 +31,27 @@ class Operator():
     def __init__(self,type):
         self.type = type
         self.value = OPERATORS[self.type][1]
-        self.operate = OPERATORS[self.type][0]
+        self.op = OPERATORS[self.type][0]
+
+    def operate(self,x,y):
+        if type(x) == var:
+
+            if self.type == "=":
+                x.vars[x.name] = y.val if type(y) == var else y
+                return x.vars[x.name]
+            elif x.set:
+                x = x.val
+            else:
+                self._error(2,x.name)
+
+        if type(y) == var:
+            if y.set:
+                y = y.val
+            else:
+                self._error(2,y.name)
+
+        return self.op(x,y)
+
     def __str__(self):
         return self.type
     def __repr__(self):
@@ -41,6 +64,13 @@ class Operator():
         return self.value <= other.value
     def __ge__(self,other):
         return self.value >= other.value
+
+class var():
+    def __init__(self,name,val,vars,set=True):
+        self.name = name
+        self.val = val
+        self.set = set
+        self.vars = vars
 
 
 class Interpreter():
@@ -117,6 +147,7 @@ class Interpreter():
                         return
 
 
+
             if command == "let":
                 self.c_let(line)
             elif command == "log":
@@ -140,8 +171,13 @@ class Interpreter():
             elif command == "fn":
                 self.c_fn(line)
         else:
+
+
             if len(self.fn_line_stack) > 0:
                 self.fn_line_stack[-1].append(line)
+                return
+
+            if len(self.nest_stack) > 0 and self.nest_stack[-1][1] == False:
                 return
 
             self._eval(line)
@@ -169,11 +205,11 @@ class Interpreter():
             try:
                 item = float(item)
             except:
-                try:
-                    item = self.vars[item]
 
-                except KeyError:
-                    self._error(2,item)
+                if item in self.vars:
+                    item = var(item,self.vars[item],self.vars)
+                else:
+                    item = var(item,None,self.vars,set=False)
 
         return item
 
@@ -260,7 +296,6 @@ class Interpreter():
 
 
     def _eval_rpn(self,items):
-        #print("ITEMS "+str(items))
         stack = []
 
         for item in items:
@@ -268,20 +303,19 @@ class Interpreter():
                 rt = stack.pop()
                 lt = stack.pop()
                 try:
-
-                    if (type(rt) == str and type(lt)) == int or (type(lt) == str and type(rt) == int) and item.type == "+":
-                        if type(rt) == int:
-                            rt = str(rt)
-                        elif type(lt) == int:
-                            lt = str(lt)
-
                     stack.append(item.operate(lt,rt))
-                except TypeError:
+                except TypeError as r:
                     self._error(7,type(lt).__name__+" "+str(item)+" "+type(rt).__name__)
             else:
                 stack.append(item)
 
-        out =  stack.pop()
+        out = stack.pop()
+
+        if type(out) == var:
+            if out.set:
+                out = out.val
+            else:
+                self._error(2,out.name)
 
         if type(out) == bool:
             out = int(out)
@@ -289,7 +323,6 @@ class Interpreter():
         return out
 
     def _tokens_to_rpn(self,tokens):
-        #print(tokens)
         stack = []
         rpn = []
         items = []
@@ -305,7 +338,7 @@ class Interpreter():
                 items.append(item)
 
         for c in items:
-            if type(c) == float or type(c) == int or type(c) == str:
+            if type(c) == float or type(c) == int or type(c) == str or type(c) == var:
                 rpn.append(c)
 
             elif type(c) == Operator:

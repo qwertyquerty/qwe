@@ -1,14 +1,13 @@
 fn fizzbuzz(n) [
 
-  let s = ""
-  log(x)
+  s = ""
 
   if n % 3 == 0 [
-    let s = s + "Fizz"
+    s = s + "Fizz"
   ]
 
   if n % 5 == 0 [
-    let s = s + "Buzz"
+    s = s + "Buzz"
   ]
 
   if s == "" [
@@ -21,11 +20,11 @@ fn fizzbuzz(n) [
 
 ]
 
-let n = 0
+n = 0
 
 while 1 [
 
-  let n = n + 1
+  n = n + 1
 
   log(fizzbuzz(n))
 
