@@ -33,22 +33,30 @@ class Operator():
         self.value = OPERATORS[self.type][1]
         self.op = OPERATORS[self.type][0]
 
-    def operate(self,x,y):
+    def operate(self,x,y,i):
         if type(x) == var:
 
             if self.type == "=":
-                x.vars[x.name] = y.val if type(y) == var else y
-                return x.vars[x.name]
+                if RE_VARNAME.match(x.name) and len(x.name) > 0 and x.name not in COMMANDS and x.name not in OPERATORS.keys():
+                    if type(y) == var:
+                        if not y.set:
+                            i._error(2,y.name)
+                        y = y.val
+                    x.vars[x.name] = y
+                    return x.vars[x.name]
+                else:
+                    i._error(3,x.name)
+
             elif x.set:
                 x = x.val
             else:
-                self._error(2,x.name)
+                i._error(2,x.name)
 
         if type(y) == var:
             if y.set:
                 y = y.val
             else:
-                self._error(2,y.name)
+                i._error(2,y.name)
 
         return self.op(x,y)
 
@@ -303,7 +311,7 @@ class Interpreter():
                 rt = stack.pop()
                 lt = stack.pop()
                 try:
-                    stack.append(item.operate(lt,rt))
+                    stack.append(item.operate(lt,rt,self))
                 except TypeError as r:
                     self._error(7,type(lt).__name__+" "+str(item)+" "+type(rt).__name__)
             else:
@@ -330,12 +338,8 @@ class Interpreter():
         for i in range(len(tokens)):
 
             item = tokens[i]
-            if (type(item) == Operator and item.type == "-") and (i == 0 or (type(tokens[i-1]) == Operator and not tokens[i-1].type in PARENTHESES)) and (type(tokens[i+1]) == float or type(tokens[i+1]) == int):
-                tokens[i+1] = tokens[i+1] * -1
-            elif (type(item) == Operator and item.type == "not") and (i == 0 or (type(tokens[i-1]) == Operator and not tokens[i-1].type in PARENTHESES)) and (type(tokens[i+1]) == float or type(tokens[i+1]) == int):
-                tokens[i+1] = int(not tokens[i+1])
-            else:
-                items.append(item)
+
+            items.append(item)
 
         for c in items:
             if type(c) == float or type(c) == int or type(c) == str or type(c) == var:
@@ -364,36 +368,8 @@ class Interpreter():
         return rpn
 
 
-    def c_let(self,line):
-        if len(line.split("+=", 1)) == 2:
-            var,val=line.split("+=",1)
-            op = "+="
-        elif len(line.split("-=", 1)) == 2:
-            var,val=line.split("-=",1)
-            op = "-="
-        elif len(line.split("=", 1)) == 2:
-            var,val=line.split("=",1)
-            op = "="
-
-
-        var = var.replace(" ", "")
-        #val = self._eval(val)
-        if RE_VARNAME.match(var) and len(var) > 0 and var not in COMMANDS and var not in OPERATORS.keys():
-            if op == "=":
-                self.vars[var] = self._eval(val)
-            elif op == "+=":
-                self.vars[var] = self._eval(var+" + ("+val+")")
-            elif op == "-=":
-                self.vars[var] = self._eval(var+" - ("+val+")")
-
-        else:
-            self._error(3,var)
-
     def c_log(self,line):
         print(self._eval(line))
-
-    def c_goto(self,line):
-        self.line = self._eval(line)-2
 
     def c_exit(self,line):
         exit()
