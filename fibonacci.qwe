@@ -1,7 +1,0 @@
-let a = 1
-let b = 1
-let c = b
-let b = a + b
-let a = c
-log a
-goto 3
